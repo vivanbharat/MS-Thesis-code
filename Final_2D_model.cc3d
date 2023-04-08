@@ -1,0 +1,5 @@
+<Simulation version="4.3.0">
+   <XMLScript Type="XMLScript">Simulation/Model_2D_XY_ovcar_with_chemotaxis_mixed.xml</XMLScript>
+   <PythonScript Type="PythonScript">Simulation/Model_2D_XY_ovcar_with_chemotaxis_mixed.py</PythonScript>
+   <Resource Type="Python">Simulation/Model_2D_XY_ovcar_with_chemotaxis_mixedSteppables.py</Resource>
+</Simulation>

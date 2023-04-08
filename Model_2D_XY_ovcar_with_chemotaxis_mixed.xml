@@ -1,0 +1,153 @@
+<CompuCell3D Revision="2" Version="4.3.0">
+   
+   <Metadata>
+      
+      <!-- Basic properties simulation -->
+      <NumberOfProcessors>4</NumberOfProcessors>
+      <!--<DebugOutputFrequency>10</DebugOutputFrequency> -->
+      <!-- <NonParallelModule Name="Potts"/> -->
+   </Metadata>
+   
+   <Potts>
+      
+      <!-- Basic properties of CPM (GGH) algorithm -->
+      <!-- Basic properties of CPM (GGH) algorithm -->
+      <Dimensions x="140" y="140" z="1"/>
+      <Steps>100000</Steps>
+      <Temperature>20.0</Temperature>
+      <NeighborOrder>1</NeighborOrder>
+      <!-- <Boundary_x>Periodic</Boundary_x> -->
+      <!-- <Boundary_y>Periodic</Boundary_y> -->
+   </Potts>
+   
+   <Plugin Name="CellType">
+      
+      <!-- Listing all cell types in the simulation -->
+      <CellType TypeId="0" TypeName="Medium"/>
+      <CellType TypeId="1" TypeName="SEN"/>
+      <CellType TypeId="2" TypeName="NON_SEN"/>
+      <CellType TypeId="3" TypeName="CANCER"/>
+      <CellType Freeze="" TypeId="4" TypeName="WALL"/>
+   </Plugin>
+   
+   <Plugin Name="Volume">
+   </Plugin>
+   
+   <Plugin Name="Surface">
+   </Plugin>
+
+   <Plugin Name="ExternalPotential">
+      
+      <!-- External force applied to cell. Each cell type has different force. -->
+      <!-- For more flexible specification of the constraint (done in Python) please use ExternalPotential plugin without specifying per-type parameters -->
+      <!-- Algorithm options are: PixelBased, CenterOfMassBased -->
+      <Algorithm>PixelBased</Algorithm>
+   </Plugin>
+   
+   <Plugin Name="CenterOfMass">
+      
+      <!-- Module tracking center of mass of each cell -->
+   </Plugin>
+   
+   <Plugin Name="NeighborTracker">
+      
+      <!-- Module tracking neighboring cells of each cell -->
+   </Plugin>
+   
+   <Plugin Name="Contact">
+      <!-- Specification of adhesion energies -->
+      <Energy Type1="Medium" Type2="Medium">10.0</Energy>
+      <Energy Type1="Medium" Type2="SEN">10.0</Energy>
+      <Energy Type1="Medium" Type2="NON_SEN">10.0</Energy>
+      <Energy Type1="Medium" Type2="CANCER">10.0</Energy>
+      <Energy Type1="SEN" Type2="SEN">30.0</Energy>
+      <Energy Type1="SEN" Type2="NON_SEN">30.0</Energy>
+      <Energy Type1="SEN" Type2="CANCER">30.0</Energy>
+      <Energy Type1="NON_SEN" Type2="NON_SEN">30.0</Energy>
+      <Energy Type1="NON_SEN" Type2="CANCER">30.0</Energy>
+      <Energy Type1="CANCER" Type2="CANCER">30.0</Energy>
+      <!-- <Energy Type1="WALL" Type2="WALL">70.0</Energy> -->
+      <!-- <Energy Type1="WALL" Type2="MEDIUM">70.0</Energy> -->
+      <Energy Type1="WALL" Type2="SEN">50.0</Energy>
+      <Energy Type1="WALL" Type2="NON_SEN">50.0</Energy>
+      <Energy Type1="WALL" Type2="CANCER">50.0</Energy>
+      
+      <NeighborOrder>4</NeighborOrder>
+   </Plugin>
+   
+   <Plugin Name="Chemotaxis">
+      
+      <!-- You may repeat ChemicalField element for each chemical field declared in the PDE solvers -->
+      <!-- Specification of chemotaxis properties of select cell types. -->
+      <ChemicalField Name="CHEMOKINE">
+        <ChemotaxisByType ChemotactTowards="NON_SEN" Lambda="0" Type="CANCER"/>
+      </ChemicalField>
+      <ChemicalField Name="CHEMOKINE">
+        <ChemotaxisByType ChemotactTowards="CANCER" Lambda="0" Type="CANCER"/>
+      </ChemicalField>
+      <ChemicalField Name="CHEMOKINE">
+        <ChemotaxisByType ChemotactTowards="Medium" Lambda="0" Type="CANCER"/>
+      </ChemicalField>
+   </Plugin>
+   
+   <Plugin Name="Secretion">
+      
+      <!-- Specification of secretion properties of select cell types. -->
+      <!-- You may repeat Field element for each chemical field declared in the PDE solvers -->
+      <!-- Specification of secretion properties of individual cells can be done in Python -->
+      <Field Name="CHEMOKINE">
+         <!-- <Secretion Type="SEN">10.0</Secretion> --> 
+      </Field>
+   </Plugin>
+   
+   <Steppable Type="DiffusionSolverFE">
+      
+      <!-- Specification of PDE solvers -->
+      <DiffusionField Name="CHEMOKINE">
+         <DiffusionData>
+            <FieldName>CHEMOKINE</FieldName>
+            <GlobalDiffusionConstant>0.1</GlobalDiffusionConstant>
+            <GlobalDecayConstant>0.0002</GlobalDecayConstant>
+            <!-- Additional options are: -->
+            <!-- <InitialConcentrationExpression>x*y</InitialConcentrationExpression> -->
+            <!-- <ConcentrationFileName>INITIAL CONCENTRATION FIELD - typically a file with path Simulation/NAME_OF_THE_FILE.txt</ConcentrationFileName> -->
+            <!-- <DiffusionCoefficient CellType="SEN">10.0</DiffusionCoefficient> -->
+            <!-- <DiffusionCoefficient CellType="NON_SEN">10.0</DiffusionCoefficient> -->
+            <!-- <DiffusionCoefficient CellType="CANCER">10.0</DiffusionCoefficient> -->
+            <!-- <DecayCoefficient CellType="SEN">0.0</DecayCoefficient> -->
+            <!-- <DecayCoefficient CellType="NON_SEN">0.0</DecayCoefficient> -->
+            <!-- <DecayCoefficient CellType="CANCER">0.0</DecayCoefficient> -->
+         </DiffusionData>
+         <SecretionData>
+            <!-- When secretion is defined inside DissufionSolverFE all secretion constants are scaled automaticaly to account for the extra calls to the diffusion step when handling large diffusion constants -->
+            
+            <!-- Uniform secretion Definition -->
+            <!-- <Secretion Type="SEN">10.0</Secretion> -->
+            <!-- <Secretion Type="NON_SEN">0.1</Secretion> -->
+            <!-- <Secretion Type="CANCER">0.1</Secretion> -->
+            <!-- <SecretionOnContact SecreteOnContactWith="SEN,NON_SEN,CANCER" Type="CANCER">0.2</SecretionOnContact> -->
+            <!-- <ConstantConcentration Type="CANCER">0.1</ConstantConcentration> -->
+         </SecretionData>
+         <BoundaryConditions>
+            <Plane Axis="X">
+               <!-- <ConstantValue PlanePosition="Min" Value="0.0"/> -->
+               <!-- <ConstantValue PlanePosition="Max" Value="0.0"/> -->
+               <!-- Other options are (examples): -->
+               <!-- <Periodic/> -->
+               <ConstantDerivative PlanePosition="Min" Value="0.0"/>
+               <ConstantDerivative PlanePosition="Max" Value="0.0"/>
+            </Plane>
+            <Plane Axis="Y">
+               <ConstantDerivative PlanePosition="Min" Value="0.0"/>
+               <ConstantDerivative PlanePosition="Max" Value="0.0"/>
+               <!-- Other options are (examples): -->
+               <!-- <Periodic/> -->
+               <!-- <ConstantValue PlanePosition="Min" Value="10.0"/> -->
+            </Plane>
+         </BoundaryConditions>
+      </DiffusionField>
+   </Steppable>
+   
+   <Steppable Type="UniformInitializer">
+   </Steppable>
+</CompuCell3D>
